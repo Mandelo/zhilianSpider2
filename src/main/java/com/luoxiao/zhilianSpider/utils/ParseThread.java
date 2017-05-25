@@ -62,7 +62,7 @@ public class ParseThread implements Runnable {
                     e.printStackTrace();
                 }
             } else if(pageNoInt == maxPage) {
-                System.out.println("------------------------------------------FINISH------------------------------------------");
+                return;
             }
         }
     }
