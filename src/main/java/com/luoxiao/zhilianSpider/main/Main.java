@@ -22,11 +22,12 @@ public class Main {
         th3.setName("爬虫 [3]号");
         Thread th4 = new Thread(parseThread);
         th4.setName("爬虫 [4]号");
+    
         th1.start();
         th2.start();
         th3.start();
         th4.start();
-
+   
     }
 
 }

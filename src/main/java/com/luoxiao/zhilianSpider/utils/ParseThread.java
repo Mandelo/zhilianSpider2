@@ -16,47 +16,53 @@ import org.jsoup.select.Elements;
 
 import com.luoxiao.zhilianSpider.bean.JobInfoBean;
 
-/** 
-* @Description: 
-* @author losho
-* @date 2017年5月25日 
-*/
+/**
+ * @Description:
+ * @author losho
+ * @date 2017年5月25日
+ */
 public class ParseThread implements Runnable {
 
-    private Boolean flag = true;
     String pageNo = "0";
-    // 定义爬取页数，最大为90
-    int maxPage = 10;
+    Object obj = new Object();
+    // 定义爬取页数，推荐90以内
+    int maxPage = 5;
     Integer pageNoInt = Integer.valueOf(pageNo);
-
+    
     @Override
     public void run() {
         System.out.println(Thread.currentThread().getName() + "：打卡上班........");
-        ParseThread tools = new ParseThread();
-        synchronized ("") {
-            while (flag) {
-                if (pageNoInt < maxPage) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        tools.praseContent("java", "武汉");
-                        pageNoInt++;
-                    } catch (ClassNotFoundException | SQLException e) {
-                        e.printStackTrace();
-                    }
-                } else if (pageNoInt == maxPage) {
-                    if (flag) {
-                        System.out
-                                .println("==========================================抓取结束==============================================");
-                        System.out.println("==========================================共抓取页面" + pageNoInt
-                                + "页==========================================");
-                        flag = false;
-                        break;
-                    }
+        while (pageNoInt < maxPage) {
+            try {
+                parse();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * @Description: 抓取方法
+     * @param:   
+     * @return: 
+     * @throws
+     */
+    public void parse() throws InterruptedException {
+       synchronized (obj) {
+            if (pageNoInt < maxPage) {
+                pageNoInt++;
+                try {
+                    praseContent("java", "武汉");
+                } catch (ClassNotFoundException | SQLException e) {
+                    e.printStackTrace();
                 }
+            } else if(pageNoInt == maxPage) {
+                System.out.println("------------------------------------------FINISH------------------------------------------");
             }
         }
     }
@@ -76,14 +82,13 @@ public class ParseThread implements Runnable {
 
             document = Jsoup.connect(url).data(paramMap).timeout(timeOut).get();
             pageNo = document.select("div.pagesDown>ul>li>a.current").text();
-            pageNoInt += 1;
+            // pageNoInt += 1;
             paramMap.put("p", String.valueOf(pageNoInt));
-            System.out
-                    .println("------------------------------------------------------------------抓取开始-----------------------------------------");
+            System.out.println("-----------------------------------------------"
+                    + Thread.currentThread().getName() + "抓取中---------------------------------------------------------------");
             // 开始解析并存入数据库
-            // 修改请求页码,爬取下一页
-            System.out.println("-------------------------查询参数:--------------->>" + paramMap
-                    + "<<------------------------------------------");
+            System.out.println("------------------------------>>查询参数:[" + Thread.currentThread().getName()  +":"
+                    + paramMap + "]<<------------------------------------------");
             parseAndSave(document);
 
         } catch (IOException e) {
