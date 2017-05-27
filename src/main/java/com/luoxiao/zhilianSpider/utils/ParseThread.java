@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class ParseThread implements Runnable {
     
     @Override
     public void run() {
-        System.out.println(Thread.currentThread().getName() + "：打卡上班........");
+        System.out.println(Thread.currentThread().getName() + "：starting........");
         while (pageNoInt < maxPage) {
             try {
                 parse();
@@ -85,9 +86,10 @@ public class ParseThread implements Runnable {
             // pageNoInt += 1;
             paramMap.put("p", String.valueOf(pageNoInt));
             System.out.println("-----------------------------------------------"
-                    + Thread.currentThread().getName() + "抓取中---------------------------------------------------------------");
+                    + Thread.currentThread().getName() + "WORKING AT "+ new Date().getTime()+"---------------------------------------------------------------");
             // 开始解析并存入数据库
-            System.out.println("------------------------------>>查询参数:[" + Thread.currentThread().getName()  +":"
+            
+            System.out.println("------------------------------>>查询参数:[" + Thread.currentThread().getName()  +" "
                     + paramMap + "]<<------------------------------------------");
             parseAndSave(document);
 
@@ -121,11 +123,11 @@ public class ParseThread implements Runnable {
             Set<String> blacklistSet1 = getSet(ConnectionTools.blackList);
             // 过滤黑名单公司
             if (blacklistSet1.contains(bean.getCompanyName())) {
-                System.out.println(Thread.currentThread().getName() + "搬砖中###"
+                System.out.println(Thread.currentThread().getName() + "*****"
                         + "[发现黑名单] -----\\w(ﾟДﾟ)w \\w(ﾟДﾟ)w \\w(ﾟДﾟ)w=====>>  " + bean.getCompanyName());
             } else {
                 stmt.execute(sql);
-                System.out.println(Thread.currentThread().getName() + "搬砖中###" + "存入到数据库成功！" + bean);
+                System.out.println(Thread.currentThread().getName() + "====>" + "存入到数据库成功！" + bean);
             }
             stmt.close();
             connection.close();
