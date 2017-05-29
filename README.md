@@ -1,2 +1,2 @@
 # zhilianSpider2
-zhilianSpider多线程版
+zhilianSpider多线程
