@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import org.jsoup.Jsoup;
@@ -27,52 +28,56 @@ public class ParseThread implements Runnable {
     public String pageNo = "0";
     Object obj = new Object();
     // 定义爬取页数，推荐90以内
-    int maxPage = 15;
+    int maxPage = 5;
     Integer pageNoInt = Integer.valueOf(pageNo);
-    
+
     @Override
     public void run() {
         System.out.println(Thread.currentThread().getName() + "：starting........");
         while (pageNoInt < maxPage) {
             try {
                 parse();
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
             }
         }
     }
 
+    public String getTime() {
+        String msg = "";
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY/MM/dd HH:mm:ss.SSS");
+        msg += "[" + sdf.format(date) + "]";
+        return msg;
+    }
+
     /**
      * @Description: 抓取方法
-     * @param:   
-     * @return: 
+     * @param:
+     * @return:
      * @throws
      */
     public void parse() throws InterruptedException {
-     synchronized (obj) {
+        synchronized (pageNo) {
             if (pageNoInt < maxPage) {
-                pageNoInt++;
                 try {
                     praseContent("java", "武汉");
                 } catch (ClassNotFoundException | SQLException e) {
                     e.printStackTrace();
                 }
-            } else if(pageNoInt == maxPage) {
+            } else if (pageNoInt == maxPage) {
+                System.out.println(getTime() + Thread.currentThread().getName() + "STOP");
                 return;
             }
-   }
+        }
     }
 
     // 抓取的总数据量
     public void praseContent(String job, String position) throws ClassNotFoundException, SQLException {
         String url = ConnectionTools.ZHILIAN_URL;
         int timeOut = 60 * 3000;
-        
+
         Document document = null;
         try {
             // 封装请求参数
@@ -80,18 +85,17 @@ public class ParseThread implements Runnable {
             paramMap.put("jl", position);
             paramMap.put("kw", job);
             paramMap.put("sm", "0");
-            paramMap.put("p", "1");
+            paramMap.put("p", pageNo);
 
             document = Jsoup.connect(url).data(paramMap).timeout(timeOut).get();
             pageNo = document.select("div.pagesDown>ul>li>a.current").text();
-            // pageNoInt += 1;
+            pageNoInt += 1;
             paramMap.put("p", String.valueOf(pageNoInt));
-            System.out.println("-----------------------------------------------"
-                    + Thread.currentThread().getName() +"---------------------------------------------------------------");
+
             // 开始解析并存入数据库
-            
-            System.out.println("------------------------------>>查询参数:[" + Thread.currentThread().getName()  +" "
-                    + paramMap + "]<<------------------------------------------");
+
+            System.out.println(getTime() + "查询参数:[" + Thread.currentThread().getName() + " " + paramMap
+                    + "]<<------------------------------------------");
             parseAndSave(document);
 
         } catch (IOException e) {
@@ -124,11 +128,11 @@ public class ParseThread implements Runnable {
             Set<String> blacklistSet1 = getSet(ConnectionTools.blackList);
             // 过滤黑名单公司
             if (blacklistSet1.contains(bean.getCompanyName())) {
-           //     System.out.println(Thread.currentThread().getName() + "*****"
-          //              + "[发现黑名单] -----\\w(ﾟДﾟ)w \\w(ﾟДﾟ)w \\w(ﾟДﾟ)w=====>>  " + bean.getCompanyName());
+                System.out.println(getTime() + Thread.currentThread().getName() + "*****" + "[发现黑名单]"
+                        + bean.getCompanyName());
             } else {
                 stmt.execute(sql);
-         //       System.out.println(Thread.currentThread().getName() + "====>" + "存入到数据库成功！" + bean);
+                System.out.println(getTime() + Thread.currentThread().getName() + "====>" + "存入到数据库成功！" + bean);
             }
             stmt.close();
             connection.close();
