@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.jsoup.Jsoup;
@@ -24,10 +24,10 @@ import com.luoxiao.zhilianSpider.bean.JobInfoBean;
  */
 public class ParseThread implements Runnable {
 
-    String pageNo = "0";
+    public String pageNo = "0";
     Object obj = new Object();
     // 定义爬取页数，推荐90以内
-    int maxPage = 5;
+    int maxPage = 15;
     Integer pageNoInt = Integer.valueOf(pageNo);
     
     @Override
@@ -54,7 +54,7 @@ public class ParseThread implements Runnable {
      * @throws
      */
     public void parse() throws InterruptedException {
-       synchronized (obj) {
+     synchronized (obj) {
             if (pageNoInt < maxPage) {
                 pageNoInt++;
                 try {
@@ -65,13 +65,14 @@ public class ParseThread implements Runnable {
             } else if(pageNoInt == maxPage) {
                 return;
             }
-        }
+   }
     }
 
     // 抓取的总数据量
     public void praseContent(String job, String position) throws ClassNotFoundException, SQLException {
         String url = ConnectionTools.ZHILIAN_URL;
         int timeOut = 60 * 3000;
+        
         Document document = null;
         try {
             // 封装请求参数
@@ -86,7 +87,7 @@ public class ParseThread implements Runnable {
             // pageNoInt += 1;
             paramMap.put("p", String.valueOf(pageNoInt));
             System.out.println("-----------------------------------------------"
-                    + Thread.currentThread().getName() + "WORKING AT "+ new Date().getTime()+"---------------------------------------------------------------");
+                    + Thread.currentThread().getName() +"---------------------------------------------------------------");
             // 开始解析并存入数据库
             
             System.out.println("------------------------------>>查询参数:[" + Thread.currentThread().getName()  +" "
@@ -123,11 +124,11 @@ public class ParseThread implements Runnable {
             Set<String> blacklistSet1 = getSet(ConnectionTools.blackList);
             // 过滤黑名单公司
             if (blacklistSet1.contains(bean.getCompanyName())) {
-                System.out.println(Thread.currentThread().getName() + "*****"
-                        + "[发现黑名单] -----\\w(ﾟДﾟ)w \\w(ﾟДﾟ)w \\w(ﾟДﾟ)w=====>>  " + bean.getCompanyName());
+           //     System.out.println(Thread.currentThread().getName() + "*****"
+          //              + "[发现黑名单] -----\\w(ﾟДﾟ)w \\w(ﾟДﾟ)w \\w(ﾟДﾟ)w=====>>  " + bean.getCompanyName());
             } else {
                 stmt.execute(sql);
-                System.out.println(Thread.currentThread().getName() + "====>" + "存入到数据库成功！" + bean);
+         //       System.out.println(Thread.currentThread().getName() + "====>" + "存入到数据库成功！" + bean);
             }
             stmt.close();
             connection.close();
