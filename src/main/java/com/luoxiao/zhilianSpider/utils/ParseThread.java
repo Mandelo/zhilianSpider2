@@ -28,7 +28,7 @@ public class ParseThread implements Runnable {
     public String pageNo = "0";
     Object obj = new Object();
     // 定义爬取页数，推荐90以内
-    int maxPage = 5;
+    int maxPage = 15;
     Integer pageNoInt = Integer.valueOf(pageNo);
 
     @Override
