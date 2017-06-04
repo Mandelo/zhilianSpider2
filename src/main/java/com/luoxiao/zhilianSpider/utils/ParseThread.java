@@ -44,6 +44,7 @@ public class ParseThread implements Runnable {
         }
     }
 
+    //获取当前系统时间
     public String getTime() {
         String msg = "";
         Date date = new Date();
