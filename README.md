@@ -1,2 +1,2 @@
 # zhilianSpider2
-zhilianSpider 多线程
+zhilianSpider 多线程爬虫
